@@ -2,7 +2,7 @@ import mailbox
 from email.generator import Generator
 
 mbox = mailbox.mbox('./data/Mail/messages.mbox')
-outbox = open('output02.txt', 'w')
+outbox = open('output04.txt', 'w')
 g = Generator(outbox)
 
 
@@ -16,6 +16,10 @@ def main(box):
         '''
         if m is None:
             return None
+
+        if not from_a_to_me(m) or not from_me_to_a(m):
+            return None
+
         if m.is_multipart() is False:
             # single message; write & return
             return g.write(m.get_payload(decode=True))
@@ -24,44 +28,33 @@ def main(box):
             for part in m.walk():
                 payload = m.get_payload(decode=True)
                 if isinstance(payload, list):
-                    for mm in payload:
-                        walk_msg(mm)
+                    g.write(g.flatten(payload))
+                    # for mm in payload:
+                    # walk_msg(mm)
                 elif payload is not None:
                     return g.write(payload)
 
-    for k, m in box.iteritems():
-        if m is not None:
-            if from_a_to_me(m) or from_me_to_a(m):
-                if m.is_multipart() is True:
-                    return walk_msg(m)
-                    # for part in m.walk():
-                    #     if part.get_content_type() in preferred_content:
-                    #         payload = m.get_payload()
-                    #         try:
-                    #             g.write(payload)
-                    #         except TypeError as e:
-                    #             for msg in payload:
-                    #                 g.write(msg.get_payload())
-                else:
-                    # try:
-                        # g.write(p)
-                    # except TypeError as e:
-                        # print('error: ', e, ' for p: ', p)
-                    g.write(m.get_payload())
-            else:
-                print('dont care: ', m_from(m))
+    for m in box.itervalues():
+        if m.is_multipart() is True:
+            walk_msg(m)
+        elif from_a_to_me(m) or from_me_to_a(m):
+            # try:
+                # g.write(p)
+            # except TypeError as e:
+                # print('error: ', e, ' for p: ', p)
+            g.write(m.get_payload())
+        else:
+            continue
 
 
 def from_a_to_me(m):
     f = m_from(m)
-    t = to(m) or 'jared'
-    return 'annie' in f.lower() and 'jared' in t.lower()
+    return 'annie' in f.lower()
 
 
 def from_me_to_a(m):
-    f = m_from(m)
     t = to(m) or 'annie'
-    return 'jared' in f.lower() and 'annie' in t.lower()
+    return 'annie' in t.lower()
 
 
 def m_from(m):
