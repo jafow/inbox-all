@@ -1,8 +1,8 @@
 import mailbox
 from email.generator import Generator
 
-mbox = mailbox.mbox('./data/all_mail.mbox')
-outbox = open('output.txt', 'w')
+mbox = mailbox.mbox('./data/Mail/messages.mbox')
+outbox = open('output02.txt', 'w')
 g = Generator(outbox)
 
 
@@ -18,15 +18,15 @@ def main(box):
             return None
         if m.is_multipart() is False:
             # single message; write & return
-            return g.write(m.get_payload())
+            return g.write(m.get_payload(decode=True))
         else:
             # multipart
             for part in m.walk():
-                payload = m.get_payload()
+                payload = m.get_payload(decode=True)
                 if isinstance(payload, list):
                     for mm in payload:
                         walk_msg(mm)
-                else:
+                elif payload is not None:
                     return g.write(payload)
 
     for k, m in box.iteritems():
@@ -48,18 +48,30 @@ def main(box):
                     # except TypeError as e:
                         # print('error: ', e, ' for p: ', p)
                     g.write(m.get_payload())
+            else:
+                print('dont care: ', m_from(m))
 
 
 def from_a_to_me(m):
-    f = m.get('from', None) or m.get_from()
-    t = m.get('to', None) or 'jared'
+    f = m_from(m)
+    t = to(m) or 'jared'
     return 'annie' in f.lower() and 'jared' in t.lower()
 
 
 def from_me_to_a(m):
-    f = m.get('from', None) or m.get_from()
-    t = m.get('to', None) or 'annie'
+    f = m_from(m)
+    t = to(m) or 'annie'
     return 'jared' in f.lower() and 'annie' in t.lower()
+
+
+def m_from(m):
+    x = m.get('from', None) or m.get('From', None) or m.get_from()
+    return x
+
+
+def to(m):
+    x = m.get('to', None) or m.get('To', None)
+    return x
 
 
 if __name__ == '__main__':
