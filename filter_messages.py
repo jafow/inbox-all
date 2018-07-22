@@ -1,7 +1,7 @@
 import mailbox
 from email.generator import Generator
 
-mbox = mailbox.mbox('./data/Mail/messages.mbox')
+mbox = mailbox.mbox('./data/all_mail.mbox')
 outbox = open('output.txt', 'w')
 g = Generator(outbox)
 
@@ -22,12 +22,12 @@ def main(box):
         else:
             # multipart
             for part in m.walk():
-                if part.get_content_type() in preferred_content:
-                    payload = m.get_payload()
-                    if isinstance(payload, list):
-                        return [walk_msg(mm) for mm in payload]
-                    else:
-                        return g.write(payload)
+                payload = m.get_payload()
+                if isinstance(payload, list):
+                    for mm in payload:
+                        walk_msg(mm)
+                else:
+                    return g.write(payload)
 
     for k, m in box.iteritems():
         if m is not None:
