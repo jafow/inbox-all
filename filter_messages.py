@@ -86,7 +86,7 @@ def seconds_to_str(t):
 
 def endlog():
     end = clock()
-    passed_time = start - end
+    passed_time = end - start
     print('done: ')
     print(seconds_to_str(passed_time))
 
