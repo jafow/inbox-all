@@ -1,0 +1,4 @@
+#! /usr/bin/env sh
+sed -re '/=09/d' \
+    -e '/http(s?)/d' \
+    -e 's/^(<+ )//g' \
