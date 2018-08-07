@@ -27,11 +27,9 @@ def descend(msg):
     preferred_content_types = {"text/plain", "text/html", "text/directory"}
     p = msg.get_payload()
     content_type = msg.get_content_type()
-    if isinstance(p, list):
-        # for m in p:
-        # descend(m)
-        if content_type in preferred_content_types:
-            return write_content(content_type, msg.get_payload(0))
+    if isinstance(p, list) and content_type in preferred_content_types:
+        for m in p:
+            descend(m)
     else:
         if content_type in preferred_content_types:
             return write_content(content_type, p)
