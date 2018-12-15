@@ -1,5 +1,6 @@
 import atexit
 import mailbox
+import os
 
 from email.generator import Generator
 from functools import reduce
@@ -7,10 +8,12 @@ from time import clock
 
 from bs4 import BeautifulSoup
 
-mbox = mailbox.mbox('./data/all_mail.mbox')
-outbox = open('big_output_00.txt', 'w')
+mbox = mailbox.mbox("big_output_04--payload.mbox")
+outbox = open("big_output_07--parsed-mbox.txt", "w")
 g = Generator(outbox)
 
+TO_FNAME = os.getenv("FNAME", "Mighty")
+TO_LNAME = os.getenv("LNAME", "Mouse")
 
 def main(box):
     for i, m in box.iteritems():
@@ -53,13 +56,13 @@ def from_a_to_me(m):
     """ if a message is from a to me """
     fr = m.get("from", None)
     if fr is not None:
-        return "annie" in fr.lower()
+        return TO_LNAME in fr.lower()
 
 
 def from_me_to_a(m):
     t = to(m)
     if t is not None:
-        return "annie" in t.lower()
+        return TO_FNAME in t.lower()
 
 
 def to(m):
