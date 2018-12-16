@@ -37,24 +37,36 @@ def main():
 
     logger.info(f"Tokenized {len(tokens)} words")
 
-    word_table = {word: True for word in nltkwords.words()}
-
     # filter english-only words
     # most of should be cleaned in preprocessing but just in case
     filtered = set(
-        t.lower() for t in tokens if re.search("[\/+=<>0-9_]", t.lower()) is None
+        t.lower()
+        for t in tokens
+        if re.search(r"[\/+=<>0-9_:;,'@!()$|i\{\}\[\]?&*#%]", t.lower()) is None
     )
+
+    # no stopwords
+    less_stopwords = [
+        x.lower() for x in filtered if x not in stopwords.words("english")
+    ]
 
     logger.info(f"Filtered {len(filtered)} english only words")
 
     # build a freq dist
     fdist = FreqDist(w.lower() for w in tokens)
 
+    # sort by top most common words
+    common = sorted(
+        [(word, fdist.freq(word)) for word in less_stopwords],
+        key=lambda x: x[1],
+        reverse=True,
+    )[0:500]
+
     # write to a file
     with open(dest_csv, "w") as dest:
         writer = csv.writer(dest)
-        for word in filtered:
-            writer.writerow([word, fdist.freq(word.lower())])
+        for word in common:
+            writer.writerow([word[0], word[1]])
 
     return 0
 
