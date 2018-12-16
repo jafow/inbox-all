@@ -1,3 +1,4 @@
+import argparse
 import atexit
 import csv
 from datetime import datetime
@@ -5,20 +6,26 @@ from functools import reduce
 import logging
 from time import clock
 import re
+import sys
 
 import nltk
-from nltk.corpus import PlaintextCorpusReader, words as nltkwords
+from nltk.corpus import PlaintextCorpusReader, words as nltkwords, stopwords
 from nltk.tokenize import word_tokenize
 from nltk.probability import FreqDist
 
-# download words
+# download words, stopwords
 nltk.download("words")
+nltk.download("stopwords")
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("text_mine")
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-o", "--output", default=sys.stdout, help="output path")
+args = parser.parse_args()
+
 target = "big_output_05--payload1.txt"
-dest_csv = "freq_dist--filtered.csv"
+dest_csv = args.output
 
 
 def main():
